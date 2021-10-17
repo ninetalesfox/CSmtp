@@ -1,0 +1,306 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Article Source</title>
+<link rel="stylesheet" type="text/css" href="/App_Themes/Std/CSS/CodeProject.css?dt=2.3.110622.2" />
+<base href="http://www.codeproject.com/KB/IP/" />
+</head>
+<body>
+<!--
+HTML for article "SMTP Client with SSL/TLS" by David Johns, John TWC
+URL: http://www.codeproject.com/KB/IP/smtp_ssl.aspx
+Copyright 2010 by David Johns, John TWC
+All formatting, additions and alterations Copyright Â© CodeProject, 1999-2011
+-->
+
+
+
+<div id="contentdiv" class="text" itemprop="articleBody">
+<ul class="download">
+<li><a title="Download source" href="smtp_ssl/CSmtp_v2_2_ssl.zip">Download source - 1.7 MB</a> </li>
+</ul>
+
+<h2>Introduction</h2>
+
+<p>I needed to send emails in a product written in C++, so I searched the Internet and found a great article: <a href="/KB/IP/CSmtp.aspx">SMTP Client</a> written by <a href="http://www.codeproject.com/script/Membership/View.aspx?mid=1070690">Jakub Piwowarczyk</a>. However, many of my clients use SMTP servers that require secure connection (TLS or SSL), and the SMTP Client does not support it. So I had to add SSL/TLS support to the <code>CSmtp </code>class from <a href="/KB/IP/CSmtp.aspx">SMTP Client</a> before I could use it in my product. As I was new to SSL/OpenSSL, it did take me quite some time to learn how to use it properly, and to make the code work with several popular SMTP servers. I have also seen people searching the internet looking for a C++ implementation of SMTP/SSL/TLS, but just could not find one. So I decided to share the one I wrote, in the hope that it will save people who are not familiar with SSL some time. </p>
+
+<p>Note that this article does not cover the details of SMTP. Please go to the original article <a href="/KB/IP/CSmtp.aspx">SMTP Client</a> if you need to know more about SMTP. </p>
+
+<h2>Background</h2>
+
+<p>There are 2 kinds of secure connections for SMTP, one is SSL and the other is TLS. Some SMTP servers support only one kind and some support both. Generally speaking, the port for SSL is 465, and the port for TLS is 587, but this is not always the case. In addition to the ports being different, SMTP/SSL is different than SMTP/TLS in that, SMTP/SSL negotiates an encrypted connection directly after the underlying TCP connection has been established, while SMTP/TLS requires that the client send a <code>STARTLS </code>command to the server before they negotiate an encrypted connection. </p>
+
+<p>The steps involved in SMTP/SSL are as follows:</p>
+
+<ol>
+<li>The client connects to the server using TCP. </li>
+
+<li>The client negotiates an encrypted connection with the server. </li>
+
+<li>The server sends a welcome message using the encrypted connection to the client. </li>
+
+<li>The client sends a EHLO command using the encrypted connection to the server. </li>
+
+<li>The server responds to the EHLO command using the encrypted connection. </li>
+</ol>
+
+<p>The steps involved in SMTP/TLS are as follows:</p>
+
+<ol>
+<li>The client connects to the server using TCP. </li>
+
+<li>The server sends a welcome message using the un-encrypted connection to the client. </li>
+
+<li>The client sends a EHLO command using the un-encrypted connection to the server. </li>
+
+<li>The server responds to the EHLO command using the un-encrypted connection. </li>
+
+<li>The client sends a <code>STARTTLS </code>command using the un-encrypted connection to the server. </li>
+
+<li>The server responds to the <code>STARTTLS </code>command using the un-encrypted connection. </li>
+
+<li>The client negotiates an encrypted connection with the server. </li>
+
+<li>The client sends a EHLO command using the encrypted connection to the server. </li>
+
+<li>The server responds to the EHLO command using the encrypted connection. </li>
+</ol>
+
+<h2>Using the Code</h2>
+
+<p>I have used openssl (<a href="http://www.openssl.org/">http://www.openssl.org</a>) in the sample code. The directory &quot;<em>openssl-0.9.8l</em>&quot; in the sample code contains all the necessary header files and the two pre-built <code>static openssl</code> libraries. If you would also like to use this version of <code>openssl </code>in your code, be sure to copy the entire &quot;<em>openssl-0.9.8l</em>&quot; directory to the root directory of your project and add &quot;<em>openssl-0.9.8l\inc32</em>&quot; to &quot;<em>Additional Include Directories</em>&quot;, and also add &quot;<em>openssl-0.9.8l\out32</em>&quot; to &quot;<em>Additional Library Directories</em>&quot;.</p>
+
+<p>If you would like to build your own <code>openssl</code>, please refer to <a href="http://www.openssl.org/">http://www.openssl.org</a> for detailed instructions.</p>
+
+<pre lang="C++"><span class="code-preprocessor">#define</span> test_gmail_tls
+    CSmtp mail;
+<span class="code-preprocessor">#if</span> defined(test_gmail_tls)
+    mail.SetSMTPServer(<span class="code-string">"</span><span class="code-string">smtp.gmail.com"</span>,<span class="code-digit">587</span>);
+    mail.SetSecurityType(USE_TLS);
+<span class="code-preprocessor">#elif</span> defined(test_gmail_ssl)
+    mail.SetSMTPServer(<span class="code-string">"</span><span class="code-string">smtp.gmail.com"</span>,<span class="code-digit">465</span>);
+    mail.SetSecurityType(USE_SSL);
+<span class="code-preprocessor">#elif</span> defined(test_hotmail_TLS)
+    mail.SetSMTPServer(<span class="code-string">"</span><span class="code-string">smtp.live.com"</span>,<span class="code-digit">25</span>);
+    mail.SetSecurityType(USE_TLS);
+<span class="code-preprocessor">#elif</span> defined(test_aol_tls)
+    mail.SetSMTPServer(<span class="code-string">"</span><span class="code-string">smtp.aol.com"</span>,<span class="code-digit">587</span>);
+    mail.SetSecurityType(USE_TLS);
+<span class="code-preprocessor">#elif</span> defined(test_yahoo_ssl)
+    mail.SetSMTPServer(<span class="code-string">"</span><span class="code-string">plus.smtp.mail.yahoo.com"</span>,<span class="code-digit">465</span>);
+    mail.SetSecurityType(USE_SSL);
+<span class="code-preprocessor">#endif</span>
+    mail.SetLogin(<span class="code-string">"</span><span class="code-string">***"</span>);
+    mail.SetPassword(<span class="code-string">"</span><span class="code-string">***"</span>);
+    mail.SetSenderName(<span class="code-string">"</span><span class="code-string">User"</span>);
+    <span class="code-comment">//</span><span class="code-comment"> ......
+</span>    mail.Send();</pre>
+
+<p>If you use a non-privileged user account to test Yahoo, the mail will fail to send. And the error message returned by the Yahoo SMTP server is &quot;530 Access denied: Free users cannot access this server&quot;.</p>
+
+<h2>Notes </h2>
+
+<ul>
+<li>The code does not verify the server's identity, that is, it does not check the server's certificate. This is usually not a big problem if we make sure we feed the program with correct server addresses. However, it is still worth mentioning that there is the chance that we are talking to an impersonator if we don't check the certificate. </li>
+
+<li>You are not allowed to use the code in this article for spamming. </li>
+</ul>
+
+<h2>References</h2>
+
+<ul>
+<li><a href="/KB/IP/CSmtp.aspx">SMTP Client</a> by Jakub Piwowarczyk </li>
+
+<li><a href="http://www.openssl.org/">http://www.openssl.org</a> </li>
+
+<li><a href="http://www.linuxjournal.com/article/5487?page=0,1">An Introduction to OpenSSL Programming</a> by Eric Rescorla </li>
+</ul>
+
+<h2>History </h2>
+
+<ul>
+<li>Rev 2.3, 2013/08/17 </li>
+</ul>
+
+<blockquote dir="ltr">
+<p><strong>Thanks to everyone for the effective crowdsourcing! Please keep up the improvements to our library!</strong></p>
+
+<ul>
+<li>Removed Bcc from the header as <a title="fix contributed by o15s19" href="http://www.codeproject.com/Messages/4633562/Bcc-and-mail-header.aspx">contributed by o15s19</a></li>
+
+<li>Added <a title="fix contributed by uni_gauldoth" href="http://www.codeproject.com/Messages/4610174/Re-About-snprintf-FileName-255-Attachments-FileId-.aspx">fix contributed by uni_gauldoth</a>&nbsp;with attaching files with a reserved character in their filename</li>
+
+<li>Improved the method for checking the size of file attachments as <a title="improvement contributed by GKarRacer" href="http://www.codeproject.com/Messages/4562481/retreiving-file-size-for-attachments.aspx">contributed by GKarRacer</a></li>
+
+<li>Added <code>#include &lt;unistd.h&gt;</code> for linux compiles as contributed by <a title="http://www.codeproject.com/Messages/4551908/Works-on-Linux-CSmtp-cpp-needed-sharpinclude-unist.aspx" href="http://www.codeproject.com/Messages/4551908/Works-on-Linux-CSmtp-cpp-needed-sharpinclude-unist.aspx">jim fred</a></li>
+</ul>
+</blockquote>
+
+<ul dir="ltr">
+<li>
+<div><a href="smtp_ssl/CSmtp_v2_2_ssl.zip">Rev 2.2, 2013/05/06</a> </div>
+</li>
+</ul>
+
+<blockquote dir="ltr">
+<ul>
+<li>Added <a title="fix contributed by GKarRacer" href="http://www.codeproject.com/Messages/4555663/Incorrect-range-check.aspx">fix contributed GKarRacer</a> for the improper checking of the <code>MsgBody.size()</code> before working with a line of the message body. </li>
+
+<li>Moved memory allocation and checking if all attachments can be opened to before the <code>MAIL</code> command is issued so that if there is an issue with one of them, sending the email can be gracefully aborted without the email being sent without the attachments. </li>
+
+<li>Changed all the <code>sprintf</code> commands to <code>snprintf</code> to add greater security. <code>#define</code>'d snprintf to <code>sprintf_s</code> for MS Visual C. Also changed most <code>strcpy</code> calls to <code>snprintf</code> since the MS Visual C version of that function <code>strcpy_s</code> has the arguments re-ordered so it wouldn't be possible to use it without affecting portability. </li>
+
+<li>Added <a href="http://www.codeproject.com/Messages/4451901/exception-in-SayQuit-could-lead-to-infinite-loop.aspx">fix contributed by jcyangzh</a> about a possible infinite loop in the <code></code><code>SayQuit</code> function. </li>
+
+<li>Added <a title="fixes contributed by sbrytskyy" href="http://www.codeproject.com/Messages/4433069/looks-like-a-bug-in-plain-auth.aspx">fixes contributed by sbrytskyy</a> required to make the <code>AUTH PLAIN</code> login work properly. </li>
+</ul>
+</blockquote>
+
+<ul>
+<li><a title="Download Rev 2.1" href="smtp_ssl/csmtp_v2_1_ssl.zip">Rev 2.1, 2012/11/06</a>
+<ul>
+<li>Added <a title="fixes contributed by Alan P Brown" href="http://www.codeproject.com/Messages/4151405/Re-USE_SSL-no-member-of-CSmtp.aspx">fixes contributed by Alan P Brown</a> for the invalid references to the <code>SMTP_SECURITY_TYPE </code>enumeration. </li>
+
+<li>Added <a title="modifications contributed by Oleg Dolgov" href="http://www.codeproject.com/Messages/4132697/linux-port-patch.aspx">modifications contributed by Oleg Dolgov</a> that allow it to compile in Debian Linux. </li>
+
+<li>Added <a title="feature inspired by Leon Huang and John Tang" href="http://www.codeproject.com/Messages/4238701/Re-The-subject-contains-the-Chinese-letters-could-.aspx">feature inspired by Leon Huang and John Tang</a> that allows you to change the character set from the still default US-ASCII to whatever you like by calling the new member function <code>SetCharSet()</code>. </li>
+
+<li>Added <a href="http://www.codeproject.com/Messages/3938944/Disposition-Notification-To.aspx">feature inspired by Gospa</a> that allows you to request a read receipt by calling the new member function <code>SetReadReceipt()</code>. </li>
+
+<li>Added <a title="modification inspired by Spike" href="http://www.codeproject.com/Messages/4357144/portability-bug-w-attachment-name.aspx">modification inspired by Spike</a> that distinguishes between Linux and Windows path delimiters in the attachment paths. </li>
+
+<li>Added <a title="modifications inspired by Spike" href="http://www.codeproject.com/Messages/4356937/portability-bugs-w-std-string-and-exceptions.aspx">modifications inspired by Spike</a> that uses a more simple and portable method of setting the <code>std::string</code> variables. </li>
+
+<li>Added <a title="feature contributed by Jerko" href="http://www.codeproject.com/Messages/4092347/bug-fixes-GetLocalHostName-Send.aspx">feature contributed by Jerko</a> that allows you to set the local host name by calling the new <code>SetLocalHostName()</code> member function. If you do not call this function, it works the same as it did before. </li>
+
+<li>Added <a title="modifications contributed by Korisk" href="http://www.codeproject.com/Messages/3878620/My-vote-of-5.aspx">modifications contributed by Korisk</a> that allows it to more cleanly compile in Linux. </li>
+
+<li>Added <a title="fixes contributed by Angenua Grupoi" href="http://www.codeproject.com/Messages/4196071/Bug-Mail-sent-by-mail-domain-com.aspx">fixes contributed by Angenua Grupoi</a> that fixes the behavior when the <code>m_sNameFrom</code> variable is not populated. </li>
+</ul>
+</li>
+
+<li><a title="Download Rev 2.0" href="smtp_ssl/CSmtp_v2_0_ssl.zip">Rev 2.0, 2011/06/23</a>
+<ul>
+<li>Added the <code>m_bAuthenticate</code> member variable to be able to disable authentication even though it may be supported by the server. It defaults to <code>true</code> so if it is not set, the library will act as it would have before the addition. </li>
+
+<li>Added the ability to pass the security type, <code>m_type</code>, the new <code>m_Authenticate</code> flag, the login and password into the <code>ConnectRemoteServer</code> function. If these new arguments are not included in the call, the function will work as it did before. </li>
+
+<li>Added the ability to pass the new <code>m_Authenticate</code> flag into the <code>SetSMTPServer</code> function. If not provided, the function will act as it would before the addition. </li>
+
+<li>Added <a href="http://www.codeproject.com/Messages/3681792/Bug-when-reading-answer.aspx">fixes contributed by Martin Kjallman</a> </li>
+
+<li>Added <a href="http://www.codeproject.com/Messages/3707662/Mistakes.aspx">fixes contributed by Karpov Andrey</a> </li>
+
+<li>Added <a href="http://www.codeproject.com/Messages/3587166/Re-Possible-Solution-To-Misc-EHLO-Errors.aspx">fixes contributed by Jakub Piwowarczyk</a> </li>
+</ul>
+</li>
+
+<li><a title="Download Rev 1.9" href="smtp_ssl/csmtp_v1_9_ssl.zip">Rev 1.9, 2010/08/19</a>
+<ul>
+<li>Added PLAIN, CRAM-MD5 and DIGESTMD5 authorization. </li>
+
+<li>Added a <code>DisconnectRemoteServer()</code> function and reconfigured the <code>Send()</code> function such that if you have already called the <code>ConnectRemoveServer()</code> function, it will use the existing connection and leave the connection open. This allows you to call <code>ConnectRemoteServer()</code>, then send multiple messages on the same connection. If this approach is used, you have to call <code>DisconnectRemoteServer() </code>to close the connection. If you call <code>Send()</code> without calling <code>ConnectRemoteServer()</code>, it will close the connection after sending. This change should be fully backward compatible. </li>
+</ul>
+</li>
+
+<li>Rev 1.8, 2010/08/09
+<ul>
+<li>Updates according to <a href="http://www.codeproject.com/Messages/3556346/The-bat.aspx">Hector Santos's comment</a> </li>
+</ul>
+</li>
+
+<li>2010/08/03
+<ul>
+<li>Modified Introduction </li>
+</ul>
+</li>
+
+<li>2010/08/02
+<ul>
+<li>Added note </li>
+</ul>
+</li>
+
+<li>2010/08/01 </li>
+
+<ul>
+<li>Initial post</li>
+</ul>
+</ul>
+</div>
+
+
+              </div>
+
+
+
+
+              <h2>License</h2>
+              <div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+
+
+              <div class="float-right" style="margin:20px 0 0 0;border:1px solid #ccc">
+              <div class="msg-300x250" data-format="300x250" data-type="ad" data-publisher="lqm.codeproject.site" data-zone="ros"  data-country='US' data-loadOnView='true'  data-tags='WinXP, C++, Windows, Win32, Dev, Beginner, VC9.0, Networking, Network, TCP/IP,unrated'></div>
+              </div>
+
+
+              <h2 id="ctl00_AboutHeading">About the Authors</h2>
+
+
+              <br />
+
+              <br />
+
+
+
+              <div class="clearfix"></div>
+
+
+
+
+
+            </form>
+
+
+            <div style="margin:auto;height:90px;margin-top:10px">
+              <div class="msg-728x90" data-format="728x90" data-type="ad" data-publisher="lqm.codeproject.site" data-zone="bottom"  data-country='US' data-loadOnView='true'  data-tags='WinXP, C++, Windows, Win32, Dev, Beginner, VC9.0, Networking, Network, TCP/IP,pos_bottom'></div>
+            </div>
+
+
+
+        </div>
+
+
+
+          <h2>Comments and Discussions</h2>
+
+
+
+
+      </div>
+
+    </td>
+    <td>
+      <div id="ctl00_RightSideBar" class="container-article-info">
+
+        <div class="header">About Article</div>
+        <div class="article-summary">
+
+
+
+
+
+
+
+
+          <div class="summary"><span id="ctl00_ArticleDescr">C++ SMTP client, support SSL and TLS encrypted connection to SMTP server</span></div>
+
+          <a id="ctl00_InfoBox_ParentLink"></a>
+
+    <br clear="all" />
+
+  </div>
+</div>
+</body>
+</html>
