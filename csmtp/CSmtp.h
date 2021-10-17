@@ -66,7 +66,7 @@
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
-const char BOUNDARY_TEXT[] = "__MESSAGE__ID__54yg6f6h6y456345";
+const char BOUNDARY_TEXT[] = "INVT";
 
 enum CSmptXPriority
 {
