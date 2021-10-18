@@ -99,9 +99,8 @@
 #include <cassert>
 
 #ifndef LINUX
-//Add "openssl-0.9.8l\out32" to Additional Library Directories
-#pragma comment(lib, "ssleay32.lib")
-#pragma comment(lib, "libeay32.lib")
+#pragma comment(lib, "libcrypto.lib")
+#pragma comment(lib, "libssl.lib")
 #endif
 
 
