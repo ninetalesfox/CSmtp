@@ -60,6 +60,8 @@
 
 #include "md5.h"
 
+#define OUTPUT_DEBUG_STRING_TO_COUT true
+
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
 #define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments

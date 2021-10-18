@@ -1567,7 +1567,10 @@ void CSmtp::SendData(Command_Entry* pEntry)
 	}
 
 	OutputDebugStringA(SendBuf);
-	FD_CLR(hSocket,&fdwrite);
+	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
+	std::cout << SendBuf << std::endl;
+	#endif
+    FD_CLR(hSocket,&fdwrite);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2244,6 +2247,9 @@ void CSmtp::ReceiveResponse(Command_Entry* pEntry)
 	}
 	snprintf(RecvBuf, BUFFER_SIZE, line.c_str());
 	OutputDebugStringA(RecvBuf);
+	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
+	std::cout << RecvBuf << std::endl;
+	#endif
 	if(reply_code != pEntry->valid_reply_code)
 	{
 		throw ECSmtp(pEntry->error);
@@ -2334,6 +2340,9 @@ void CSmtp::SendData_SSL(SSL* ssl, Command_Entry* pEntry)
 	}
 
 	OutputDebugStringA(SendBuf);
+	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
+	std::cout << SendBuf << std::endl;
+	#endif
 	FD_ZERO(&fdwrite);
 	FD_ZERO(&fdread);
 }
