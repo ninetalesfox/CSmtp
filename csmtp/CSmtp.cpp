@@ -92,6 +92,8 @@
 // - Version 1.9: Started with Revion 6 in code project http://www.codeproject.com/script/Articles/ListVersions.aspx?aid=98355
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include "CSmtp.h"
 #include "base64.h"
 #include "openssl/err.h"
