@@ -177,7 +177,7 @@ typedef struct tagCommand_Entry
 	ECSmtp::CSmtpError error;
 }Command_Entry;
 
-class CSmtp  
+class CSmtp
 {
 public:
 	CSmtp();
@@ -185,13 +185,13 @@ public:
 
 	void AddRecipient(const char *email, const char *name=NULL);
 	void AddBCCRecipient(const char *email, const char *name=NULL);
-	void AddCCRecipient(const char *email, const char *name=NULL);    
-	void AddAttachment(const char *path);   
+	void AddCCRecipient(const char *email, const char *name=NULL);
+	void AddAttachment(const char *path);
 	void AddMsgLine(const char* text);
 	void ClearMessage();
 	bool ConnectRemoteServer(const char* szServer, const unsigned short nPort_=0,
 							 SMTP_SECURITY_TYPE securityType=DO_NOT_SET,
-		                     bool authenticate=true, const char* login=NULL,
+							 bool authenticate=true, const char* login=NULL,
 							 const char* password=NULL);
 	void DisconnectRemoteServer();
 	void DelRecipients(void);
@@ -201,10 +201,9 @@ public:
 	void DelMsgLines(void);
 	void DelMsgLine(unsigned int line);
 	void ModMsgLine(unsigned int line,const char* text);
-	unsigned int GetBCCRecipientCount() const;    
+	unsigned int GetBCCRecipientCount() const;
 	unsigned int GetCCRecipientCount() const;
-	unsigned int GetRecipientCount() const;    
-	const char* GetLocalHostIP() const;
+	unsigned int GetRecipientCount() const;
 	const char* GetLocalHostName();
 	const char* GetMsgLineText(unsigned int line) const;
 	unsigned int GetMsgLines(void) const;
@@ -228,7 +227,7 @@ public:
 	void SetXPriority(CSmptXPriority);
 	void SetSMTPServer(const char* server, const unsigned short port=0, bool authenticate=true);
 
-private:	
+private:
 	std::string m_sLocalHostName;
 	std::string m_sMailFrom;
 	std::string m_sNameFrom;
@@ -246,7 +245,7 @@ private:
 	CSmptXPriority m_iXPriority;
 	char *SendBuf;
 	char *RecvBuf;
-	
+
 	SOCKET hSocket;
 	bool m_bConnected;
 
@@ -261,7 +260,7 @@ private:
 	std::vector<Recipient> BCCRecipients;
 	std::vector<std::string> Attachments;
 	std::vector<std::string> MsgBody;
- 
+
 	void ReceiveData(Command_Entry* pEntry);
 	void SendData(Command_Entry* pEntry);
 	void FormatHeader(char*);
