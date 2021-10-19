@@ -1,63 +1,109 @@
-#include "CSmtp.h"
+#include <string>
+#include <unordered_map>
 #include <iostream>
+#include <sstream>
+#include "CSmtp.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-	bool bError = false;
+    std::unordered_map<std::string, std::string> mailInfos;
+    ///////////////////////////////////////////////////////
+    mailInfos["ServerName"] = "";       // Required
+    mailInfos["ServerPort"] = "25";     // Configuration
+    ///////////////////////////////////////////////////////
+    mailInfos["Security"] = "none";     // Configuration
+    ///////////////////////////////////////////////////////
+    mailInfos["User"] = "";             // Required
+    mailInfos["Password"] = "";         // Required
+    ///////////////////////////////////////////////////////
+    mailInfos["SenderName"] = "";       // Required
+    mailInfos["SenderMail"] = "";       // Required
+    ///////////////////////////////////////////////////////
+    mailInfos["ReceiverMails"] = "";    // Required
+    ///////////////////////////////////////////////////////
+    mailInfos["Title"] = "";            // Required
+    mailInfos["Body"] = "";             // Required
+    ///////////////////////////////////////////////////////
+    mailInfos["Files"] = "";            // Optional
+    ///////////////////////////////////////////////////////
+    mailInfos["CharSet"] = "gb2312";    // Configuration
+    mailInfos["XMailer"] = "ms_v3.0";   // Optional
+    mailInfos["XPriority"] = "normal";  // Optional
+    ///////////////////////////////////////////////////////
+    for (int argn = 1; argn < argc; argn++) {
+        std::string info(argv[argn]);
+        size_t split = info.find_first_of('=');
+        std::string key = info.substr(0, split);
+        std::string value = info.substr(split + 1);
+        mailInfos[key] = value;
+    }
 
-	try
-	{
-		CSmtp mail;
+	bool error = false;
+	try {
+        CSmtp mail;
 
-#define test_gmail_tls
+        mail.SetSMTPServer(mailInfos["ServerName"].c_str(),
+            atoi(mailInfos["ServerPort"].c_str()));
 
-#if defined(test_gmail_tls)
-		mail.SetSMTPServer("smtp.gmail.com",587);
-		mail.SetSecurityType(USE_TLS);
-#elif defined(test_gmail_ssl)
-		mail.SetSMTPServer("smtp.gmail.com",465);
-		mail.SetSecurityType(USE_SSL);
-#elif defined(test_hotmail_TLS)
-		mail.SetSMTPServer("smtp.live.com",25);
-		mail.SetSecurityType(USE_TLS);
-#elif defined(test_aol_tls)
-		mail.SetSMTPServer("smtp.aol.com",587);
-		mail.SetSecurityType(USE_TLS);
-#elif defined(test_yahoo_ssl)
-		mail.SetSMTPServer("plus.smtp.mail.yahoo.com",465);
-		mail.SetSecurityType(USE_SSL);
-#endif
+        if (mailInfos["Security"] == "none") {
+            mail.SetSecurityType(NO_SECURITY);
+        } else if (mailInfos["Security"] == "tls") {
+            mail.SetSecurityType(USE_TLS);
+        } else if (mailInfos["Security"] == "ssl") {
+            mail.SetSecurityType(USE_SSL);
+        } else {
+            mail.SetSecurityType(DO_NOT_SET);
+        }
 
-		mail.SetLogin("***");
-		mail.SetPassword("***");
-  		mail.SetSenderName("User");
-  		mail.SetSenderMail("user@domain.com");
-  		mail.SetReplyTo("user@domain.com");
-  		mail.SetSubject("The message");
-  		mail.AddRecipient("friend@domain2.com");
-  		mail.SetXPriority(XPRIORITY_NORMAL);
-  		mail.SetXMailer("The Bat! (v3.02) Professional");
-  		mail.AddMsgLine("Hello,");
-		mail.AddMsgLine("");
-		mail.AddMsgLine("...");
-		mail.AddMsgLine("How are you today?");
-		mail.AddMsgLine("");
-		mail.AddMsgLine("Regards");
-		mail.ModMsgLine(5,"regards");
-		mail.DelMsgLine(2);
-		mail.AddMsgLine("User");
+        mail.SetLogin(mailInfos["User"].c_str());
+        mail.SetPassword(mailInfos["Password"].c_str());
 
-  		//mail.AddAttachment("../test1.jpg");
-  		//mail.AddAttachment("c:\\test2.exe");
-		//mail.AddAttachment("c:\\test3.txt");
+        mail.SetSenderName(mailInfos["SenderName"].c_str());
+        mail.SetSenderMail(mailInfos["SenderMail"].c_str());
+
+        std::stringstream receivers(mailInfos["ReceiverMails"]);
+        while (!receivers.eof()) {
+            std::string receiver;
+            receivers >> receiver;
+            mail.AddRecipient(receiver.c_str());
+        }
+
+        mail.SetSubject(mailInfos["Title"].c_str());
+        mail.AddMsgLine(mailInfos["Body"].c_str());
+
+        std::stringstream attachments(mailInfos["Files"]);
+        while (!receivers.eof()) {
+            std::string attachment;
+            receivers >> attachment;
+            mail.AddAttachment(attachment.c_str());
+        }
+
+        mail.SetCharSet(mailInfos["CharSet"].c_str());
+        mail.SetXMailer(mailInfos["XMailer"].c_str());
+        if (mailInfos["XPriority"] == "normal") {
+            mail.SetXPriority(XPRIORITY_NORMAL);
+        } else if (mailInfos["XPriority"] == "high") {
+            mail.SetXPriority(XPRIORITY_HIGH);
+        } else if (mailInfos["XPriority"] == "low") {
+            mail.SetXPriority(XPRIORITY_LOW);
+        } else {
+            mail.SetXPriority(XPRIORITY_NORMAL);
+        }
+
 		mail.Send();
+
+        std::cout << std::endl
+                  << std::endl
+                  << "----------"
+                  << std::endl
+                  << "Send mail:"
+                  << std::endl;
+	} catch(ECSmtp e) {
+        error = true;
+		std::cout << "Error: " << e.GetErrorText() << std::endl;
 	}
-	catch(ECSmtp e)
-	{
-		std::cout << "Error: " << e.GetErrorText().c_str() << ".\n";
-		bError = true;
-	}
-	if(!bError)
-		std::cout << "Mail was send successfully.\n";
+    if (!error) {
+        std::cout << "Success" << std::endl;
+    }
 	return 0;
 }
