@@ -2338,7 +2338,7 @@ void CSmtp::SendData_SSL(SSL* ssl, Command_Entry* pEntry)
 		}
 	}
 
-    m_lastOutput += RecvBuf + std::string("\r\n");
+    m_lastOutput += SendBuf + std::string("\r\n");
 	OutputDebugStringA(SendBuf);
 	FD_ZERO(&fdwrite);
 	FD_ZERO(&fdread);

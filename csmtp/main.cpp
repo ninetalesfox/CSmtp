@@ -99,8 +99,7 @@ int main(int argc, char* argv[])
         }
         mail.ClearMessage(); // Clear mail content and last output.
 
-        std::cout << std::endl << std::endl << std::endl
-                  << std::endl << "##### SEND MAIL #####";
+        std::cout << std::endl << "##### SEND MAIL #####" << std::endl;
 	} catch(ECSmtp e) {
         error = true;
 		std::cout << "- Error: " << e.GetErrorText() << std::endl;
