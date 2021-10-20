@@ -30,6 +30,8 @@ int main(int argc, char* argv[])
     mailInfos["XMailer"] = "ms_v3.0";   // Optional
     mailInfos["XPriority"] = "normal";  // Optional
     ///////////////////////////////////////////////////////
+    mailInfos["Output"] = "true";       // Optional
+    ///////////////////////////////////////////////////////
     for (int argn = 1; argn < argc; argn++) {
         std::string info(argv[argn]);
         size_t split = info.find_first_of('=');
@@ -92,18 +94,20 @@ int main(int argc, char* argv[])
 
 		mail.Send();
 
-        std::cout << std::endl
-                  << std::endl
-                  << "----------"
-                  << std::endl
-                  << "Send mail:"
-                  << std::endl;
+        if (mailInfos["Output"] == "true") {
+            std::cout << mail.GetLastOutput() << std::endl;
+        }
+        mail.ClearMessage(); // Clear mail content and last output.
+
+        std::cout << std::endl << std::endl << std::endl
+                  << std::endl << "##### SEND MAIL #####";
 	} catch(ECSmtp e) {
         error = true;
-		std::cout << "Error: " << e.GetErrorText() << std::endl;
+		std::cout << "- Error: " << e.GetErrorText() << std::endl;
 	}
     if (!error) {
-        std::cout << "Success" << std::endl;
+        std::cout << "- Success!" << std::endl;
     }
+
 	return 0;
 }
