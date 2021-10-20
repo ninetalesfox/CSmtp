@@ -528,6 +528,7 @@ void CSmtp::ClearMessage()
 	DelCCRecipients();
 	DelAttachments();
 	DelMsgLines();
+    ClearLastOutput();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1568,10 +1569,8 @@ void CSmtp::SendData(Command_Entry* pEntry)
 		}
 	}
 
+    m_lastOutput += SendBuf + std::string("\r\n");
 	OutputDebugStringA(SendBuf);
-	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
-	std::cout << SendBuf << std::endl;
-	#endif
     FD_CLR(hSocket,&fdwrite);
 }
 
@@ -2248,10 +2247,8 @@ void CSmtp::ReceiveResponse(Command_Entry* pEntry)
 		}
 	}
 	snprintf(RecvBuf, BUFFER_SIZE, line.c_str());
+    m_lastOutput += RecvBuf + std::string("\r\n");
 	OutputDebugStringA(RecvBuf);
-	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
-	std::cout << RecvBuf << std::endl;
-	#endif
 	if(reply_code != pEntry->valid_reply_code)
 	{
 		throw ECSmtp(pEntry->error);
@@ -2341,10 +2338,8 @@ void CSmtp::SendData_SSL(SSL* ssl, Command_Entry* pEntry)
 		}
 	}
 
+    m_lastOutput += RecvBuf + std::string("\r\n");
 	OutputDebugStringA(SendBuf);
-	#ifdef OUTPUT_DEBUG_STRING_TO_COUT
-	std::cout << SendBuf << std::endl;
-	#endif
 	FD_ZERO(&fdwrite);
 	FD_ZERO(&fdread);
 }
@@ -2442,4 +2437,14 @@ void CSmtp::CleanupOpenSSL()
 		SSL_CTX_free (m_ctx);
 		m_ctx = NULL;
 	}
+}
+
+const char* CSmtp::GetLastOutput() const
+{
+    return m_lastOutput.c_str();
+}
+
+void CSmtp::ClearLastOutput()
+{
+    m_lastOutput.clear();
 }

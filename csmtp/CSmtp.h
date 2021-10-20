@@ -60,8 +60,6 @@
 
 #include "md5.h"
 
-#define OUTPUT_DEBUG_STRING_TO_COUT true
-
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
 #define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
@@ -290,6 +288,14 @@ private:
 	void ReceiveData_SSL(SSL* ssl, Command_Entry* pEntry);
 	void SendData_SSL(SSL* ssl, Command_Entry* pEntry);
 	void StartTls();
+
+// Last output string
+public:
+    const char* GetLastOutput() const;
+    void ClearLastOutput();
+
+private:
+    std::string m_lastOutput;
 };
 
 
