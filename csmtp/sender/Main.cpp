@@ -2,7 +2,8 @@
 #include <unordered_map>
 #include <iostream>
 #include <sstream>
-#include "CSmtp.h"
+
+#include "../csmtp/CSmtp.h"
 
 int main(int argc, char* argv[])
 {

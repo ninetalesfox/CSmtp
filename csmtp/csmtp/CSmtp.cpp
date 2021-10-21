@@ -92,6 +92,7 @@
 // - Version 1.9: Started with Revion 6 in code project http://www.codeproject.com/script/Articles/ListVersions.aspx?aid=98355
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include "CSmtp.h"
