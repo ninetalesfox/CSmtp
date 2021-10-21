@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
         mailInfos[key] = value;
     }
 
-	bool error = false;
-	try {
+    bool error = false;
+    try {
         CSmtp mail;
 
         mail.SetSMTPServer(mailInfos["ServerName"].c_str(),
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
             mail.SetXPriority(XPRIORITY_NORMAL);
         }
 
-		mail.Send();
+        mail.Send();
 
         if (mailInfos["Output"] == "true") {
             std::cout << mail.GetLastOutput() << std::endl;
@@ -100,13 +100,13 @@ int main(int argc, char* argv[])
         mail.ClearMessage(); // Clear mail content and last output.
 
         std::cout << std::endl << "##### SEND MAIL #####" << std::endl;
-	} catch(ECSmtp e) {
+    } catch(ECSmtp e) {
         error = true;
-		std::cout << "- Error: " << e.GetErrorText() << std::endl;
-	}
+        std::cout << "- Error: " << e.GetErrorText() << std::endl;
+    }
     if (!error) {
         std::cout << "- Success!" << std::endl;
     }
 
-	return 0;
+    return 0;
 }
