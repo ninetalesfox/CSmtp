@@ -34,4 +34,13 @@ cd ..\..
 
 mkdir build\archive
 cd build\archive
+mkdir bin
+xcopy ..\solution\%BUILD_TYPE%\*.exe bin /E /Y
+xcopy ..\..\csmtp-ref\openssl-1.1.1l\openssl-1.1\%BUILD_BITS%\bin\*.dll bin /E /Y
+mkdir lib
+xcopy ..\solution\%BUILD_TYPE%\*.lib lib /E /Y
+xcopy ..\..\csmtp-ref\openssl-1.1.1l\openssl-1.1\%BUILD_BITS%\lib\*.lib lib /Y
+mkdir inc
+copy ..\..\csmtp\csmtp\CSmtp.h inc\CSmtp.h /Y
+xcopy ..\..\csmtp-ref\openssl-1.1.1l\openssl-1.1\%BUILD_BITS%\include inc /E /Y
 cd ..\..
