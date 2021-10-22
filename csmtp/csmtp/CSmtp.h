@@ -8,6 +8,7 @@
 
 
 #include <vector>
+#include <string>
 #include <string.h>
 #include <assert.h>
 
@@ -57,8 +58,6 @@
 		#define snprintf sprintf_s
 	#endif
 #endif
-
-#include "md5.h"
 
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
 #define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes

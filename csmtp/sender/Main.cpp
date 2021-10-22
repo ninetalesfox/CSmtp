@@ -1,4 +1,3 @@
-#include <string>
 #include <unordered_map>
 #include <iostream>
 #include <sstream>
@@ -68,17 +67,21 @@ int main(int argc, char* argv[])
         while (!receivers.eof()) {
             std::string receiver;
             receivers >> receiver;
-            mail.AddRecipient(receiver.c_str());
+            if (!receiver.empty()) {
+                mail.AddRecipient(receiver.c_str());
+            }
         }
 
         mail.SetSubject(mailInfos["Title"].c_str());
         mail.AddMsgLine(mailInfos["Body"].c_str());
 
         std::stringstream attachments(mailInfos["Files"]);
-        while (!receivers.eof()) {
+        while (!attachments.eof()) {
             std::string attachment;
-            receivers >> attachment;
-            mail.AddAttachment(attachment.c_str());
+            attachments >> attachment;
+            if (!attachment.empty()) {
+                mail.AddAttachment(attachment.c_str());
+            }
         }
 
         mail.SetCharSet(mailInfos["CharSet"].c_str());
