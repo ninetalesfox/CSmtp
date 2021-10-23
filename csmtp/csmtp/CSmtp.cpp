@@ -2245,7 +2245,7 @@ void CSmtp::ReceiveResponse(Command_Entry* pEntry)
 			}
 		}
 	}
-	snprintf(RecvBuf, BUFFER_SIZE, line.c_str());
+    snprintf(RecvBuf, BUFFER_SIZE, "%s", line.c_str());
     m_lastOutput += RecvBuf + std::string("\r\n");
 	OutputDebugStringA(RecvBuf);
 	if(reply_code != pEntry->valid_reply_code)
