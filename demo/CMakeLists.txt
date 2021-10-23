@@ -9,4 +9,8 @@ include_directories(../build/archive/inc)
 link_directories(../build/archive/lib)
 
 add_executable(demo Main.cpp)
+if(MSVC)
 target_link_libraries(demo csmtp)
+else()
+target_link_libraries(demo csmtp ssl crypto)
+endif()

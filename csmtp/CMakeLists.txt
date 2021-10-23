@@ -15,5 +15,11 @@ if(MSVC)
 endif()
 
 add_library(csmtp STATIC ${LIBSRC})
+if(MSVC)
+  target_link_libraries(csmtp libssl libcrypto)
+else()
+  target_link_libraries(csmtp ssl crypto)
+endif()
+
 add_executable(mail_sender ${EXESRC})
 target_link_libraries(mail_sender csmtp)
